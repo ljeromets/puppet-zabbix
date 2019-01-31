@@ -40,6 +40,10 @@
       "name": "puppet/selinux",
       "version_requirement": ">= 1.1.0 < 4.0.0"
     }
+    {
+      "name": "chocolatey-chocolatey",
+      "version_requirement": ">=1.0.0 <2.0.0"
+    }
   ],
   "source": "https://github.com/voxpupuli/puppet-zabbix.git",
   "project_page": "https://github.com/voxpupuli/puppet-zabbix",
@@ -146,11 +150,7 @@
       "operatingsystem": "Gentoo"
     },
     {
-      "operatingsystem": "Raspbian",
-      "operatingsystemrelease": [
-        "9",
-        "10"
-      ]
+      "operatingsystem": "Windows"
     }
   ]
 }
