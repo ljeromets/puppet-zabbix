@@ -27,6 +27,13 @@
 # [*manage_repo*]
 #   When true, it will create repository for installing the agent.
 #
+# [*manage_choco*]
+#   When true on windows, it will use chocolatey to install the agent.
+#
+# [*zabbix_package_provider*]
+#   Which package's provider to use to install the agent.
+#   It is undef for all linux os and set to 'chocolatey' on windows.
+#
 # [*manage_resources*]
 #   When true, it will export resources to something like puppetdb.
 #   When set to true, you'll need to configure 'storeconfigs' to make
@@ -217,71 +224,73 @@
 #
 
 class zabbix::agent (
-  $zabbix_version                         = $zabbix::params::zabbix_version,
-  $zabbix_package_state                   = $zabbix::params::zabbix_package_state,
-  $zabbix_package_agent                   = $zabbix::params::zabbix_package_agent,
-  $zabbix_package_provider                = $zabbix::params::zabbix_package_provider,
-  Boolean $manage_firewall                = $zabbix::params::manage_firewall,
-  Boolean $manage_repo                    = $zabbix::params::manage_repo,
-  Boolean $manage_resources               = $zabbix::params::manage_resources,
-  $monitored_by_proxy                     = $zabbix::params::monitored_by_proxy,
-  $agent_use_ip                           = $zabbix::params::agent_use_ip,
-  $zbx_group                              = $zabbix::params::agent_zbx_group,
-  $zbx_group_create                       = $zabbix::params::agent_zbx_group_create,
-  $zbx_templates                          = $zabbix::params::agent_zbx_templates,
-  $agent_configfile_path                  = $zabbix::params::agent_configfile_path,
-  $pidfile                                = $zabbix::params::agent_pidfile,
-  $servicename                            = $zabbix::params::agent_servicename,
-  String $logtype                         = $zabbix::params::agent_logtype,
-  Optional[Stdlib::Absolutepath] $logfile = $zabbix::params::agent_logfile,
-  $logfilesize                            = $zabbix::params::agent_logfilesize,
-  $debuglevel                             = $zabbix::params::agent_debuglevel,
-  $sourceip                               = $zabbix::params::agent_sourceip,
-  $enableremotecommands                   = $zabbix::params::agent_enableremotecommands,
-  $logremotecommands                      = $zabbix::params::agent_logremotecommands,
-  $server                                 = $zabbix::params::agent_server,
-  $listenport                             = $zabbix::params::agent_listenport,
-  $listenip                               = $zabbix::params::agent_listenip,
-  $startagents                            = $zabbix::params::agent_startagents,
-  $serveractive                           = $zabbix::params::agent_serveractive,
-  Stdlib::Ensure::Service $service_ensure = $zabbix::params::agent_service_ensure,
-  Boolean $service_enable                 = $zabbix::params::agent_service_enable,
-  $hostname                               = $zabbix::params::agent_hostname,
-  $hostnameitem                           = $zabbix::params::agent_hostnameitem,
-  $hostmetadata                           = $zabbix::params::agent_hostmetadata,
-  $hostmetadataitem                       = $zabbix::params::agent_hostmetadataitem,
-  $refreshactivechecks                    = $zabbix::params::agent_refreshactivechecks,
-  $buffersend                             = $zabbix::params::agent_buffersend,
-  $buffersize                             = $zabbix::params::agent_buffersize,
-  $maxlinespersecond                      = $zabbix::params::agent_maxlinespersecond,
-  Optional[Array] $zabbix_alias           = $zabbix::params::agent_zabbix_alias,
-  $timeout                                = $zabbix::params::agent_timeout,
-  $allowroot                              = $zabbix::params::agent_allowroot,
-  $zabbix_user                            = $zabbix::params::agent_zabbix_user,
-  $include_dir                            = $zabbix::params::agent_include,
-  $include_dir_purge                      = $zabbix::params::agent_include_purge,
-  $unsafeuserparameters                   = $zabbix::params::agent_unsafeuserparameters,
-  $userparameter                          = $zabbix::params::agent_userparameter,
-  $loadmodulepath                         = $zabbix::params::agent_loadmodulepath,
-  $loadmodule                             = $zabbix::params::agent_loadmodule,
-  $tlsaccept                              = $zabbix::params::agent_tlsaccept,
-  $tlscafile                              = $zabbix::params::agent_tlscafile,
-  $tlscertfile                            = $zabbix::params::agent_tlscertfile,
-  $tlsconnect                             = $zabbix::params::agent_tlsconnect,
-  $tlscrlfile                             = $zabbix::params::agent_tlscrlfile,
-  $tlskeyfile                             = $zabbix::params::agent_tlskeyfile,
-  $tlspskfile                             = $zabbix::params::agent_tlspskfile,
-  $tlspskidentity                         = $zabbix::params::agent_tlspskidentity,
-  $tlsservercertissuer                    = $zabbix::params::agent_tlsservercertissuer,
-  $tlsservercertsubject                   = $zabbix::params::agent_tlsservercertsubject,
-  String $agent_config_owner              = $zabbix::params::agent_config_owner,
-  String $agent_config_group              = $zabbix::params::agent_config_group,
-  Boolean $manage_selinux                 = $zabbix::params::manage_selinux,
-  Array[String] $selinux_require          = $zabbix::params::selinux_require,
-  Hash[String, Array] $selinux_rules      = $zabbix::params::selinux_rules,
-  String $additional_service_params       = $zabbix::params::additional_service_params,
-  String $service_type                    = $zabbix::params::service_type,
-  Boolean $manage_startup_script          = $zabbix::params::manage_startup_script,
+  $zabbix_version                                 = $zabbix::params::zabbix_version,
+  $zabbix_package_state                           = $zabbix::params::zabbix_package_state,
+  $zabbix_package_agent                           = $zabbix::params::zabbix_package_agent,
+  Optional[String[1]] $zabbix_package_provider    = $zabbix::params::zabbix_package_provider,
+  Boolean $manage_choco                           = $zabbix::params::manage_choco,
+  Boolean $manage_firewall                        = $zabbix::params::manage_firewall,
+  Boolean $manage_repo                            = $zabbix::params::manage_repo,
+  Boolean $manage_resources                       = $zabbix::params::manage_resources,
+  $monitored_by_proxy                             = $zabbix::params::monitored_by_proxy,
+  $agent_use_ip                                   = $zabbix::params::agent_use_ip,
+  $zbx_group                                      = $zabbix::params::agent_zbx_group,
+  Variant[String[1],Array[String[1]]] $zbx_groups = $zabbix::params::agent_zbx_groups,
+  $zbx_group_create                               = $zabbix::params::agent_zbx_group_create,
+  $zbx_templates                                  = $zabbix::params::agent_zbx_templates,
+  $agent_configfile_path                          = $zabbix::params::agent_configfile_path,
+  $pidfile                                        = $zabbix::params::agent_pidfile,
+  $servicename                                    = $zabbix::params::agent_servicename,
+  String $logtype                                 = $zabbix::params::agent_logtype,
+  Optional[Stdlib::Absolutepath] $logfile         = $zabbix::params::agent_logfile,
+  $logfilesize                                    = $zabbix::params::agent_logfilesize,
+  $debuglevel                                     = $zabbix::params::agent_debuglevel,
+  $sourceip                                       = $zabbix::params::agent_sourceip,
+  $enableremotecommands                           = $zabbix::params::agent_enableremotecommands,
+  $logremotecommands                              = $zabbix::params::agent_logremotecommands,
+  $server                                         = $zabbix::params::agent_server,
+  $listenport                                     = $zabbix::params::agent_listenport,
+  $listenip                                       = $zabbix::params::agent_listenip,
+  $startagents                                    = $zabbix::params::agent_startagents,
+  $serveractive                                   = $zabbix::params::agent_serveractive,
+  Stdlib::Ensure::Service $service_ensure         = $zabbix::params::agent_service_ensure,
+  Boolean $service_enable                         = $zabbix::params::agent_service_enable,
+  $hostname                                       = $zabbix::params::agent_hostname,
+  $hostnameitem                                   = $zabbix::params::agent_hostnameitem,
+  $hostmetadata                                   = $zabbix::params::agent_hostmetadata,
+  $hostmetadataitem                               = $zabbix::params::agent_hostmetadataitem,
+  $refreshactivechecks                            = $zabbix::params::agent_refreshactivechecks,
+  $buffersend                                     = $zabbix::params::agent_buffersend,
+  $buffersize                                     = $zabbix::params::agent_buffersize,
+  $maxlinespersecond                              = $zabbix::params::agent_maxlinespersecond,
+  Optional[Array] $zabbix_alias                   = $zabbix::params::agent_zabbix_alias,
+  $timeout                                        = $zabbix::params::agent_timeout,
+  $allowroot                                      = $zabbix::params::agent_allowroot,
+  Optional[String[1]] $zabbix_user                  = $zabbix::params::agent_zabbix_user,
+  $include_dir                                    = $zabbix::params::agent_include,
+  $include_dir_purge                              = $zabbix::params::agent_include_purge,
+  $unsafeuserparameters                           = $zabbix::params::agent_unsafeuserparameters,
+  $userparameter                                  = $zabbix::params::agent_userparameter,
+  $loadmodulepath                                 = $zabbix::params::agent_loadmodulepath,
+  $loadmodule                                     = $zabbix::params::agent_loadmodule,
+  $tlsaccept                                      = $zabbix::params::agent_tlsaccept,
+  $tlscafile                                      = $zabbix::params::agent_tlscafile,
+  $tlscertfile                                    = $zabbix::params::agent_tlscertfile,
+  $tlsconnect                                     = $zabbix::params::agent_tlsconnect,
+  $tlscrlfile                                     = $zabbix::params::agent_tlscrlfile,
+  $tlskeyfile                                     = $zabbix::params::agent_tlskeyfile,
+  $tlspskfile                                     = $zabbix::params::agent_tlspskfile,
+  $tlspskidentity                                 = $zabbix::params::agent_tlspskidentity,
+  $tlsservercertissuer                            = $zabbix::params::agent_tlsservercertissuer,
+  $tlsservercertsubject                           = $zabbix::params::agent_tlsservercertsubject,
+  Optional[String[1]] $agent_config_owner            = $zabbix::params::agent_config_owner,
+  Optional[String[1]] $agent_config_group            = $zabbix::params::agent_config_group,
+  Boolean $manage_selinux                         = $zabbix::params::manage_selinux,
+  Array[String] $selinux_require                  = $zabbix::params::selinux_require,
+  Hash[String, Array] $selinux_rules              = $zabbix::params::selinux_rules,
+  String $additional_service_params               = $zabbix::params::additional_service_params,
+  String $service_type                            = $zabbix::params::service_type,
+  Boolean $manage_startup_script                  = $zabbix::params::manage_startup_script,
 ) inherits zabbix::params {
 
   # the following two codeblocks are a bit blargh. The correct default value for
@@ -368,12 +377,20 @@ class zabbix::agent (
     }
   }
 
-  # Installing the package
-  package { $zabbix_package_agent:
-    ensure   => $zabbix_package_state,
-    require  => Class['zabbix::repo'],
-    provider => $zabbix_package_provider,
-    tag      => 'zabbix',
+  if $facts['kernel'] == 'windows' and $manage_choco and $zabbix_package_state == 'present' {
+    package { $zabbix_package_agent:
+      ensure   => $zabbix_version,
+      provider => $zabbix_package_provider,
+      tag      => 'zabbix',
+    }
+  }
+  else {
+    # Installing the package
+    package { $zabbix_package_agent:
+      ensure  => $zabbix_package_state,
+      require => Class['zabbix::repo'],
+      tag     => 'zabbix',
+    }
   }
 
   # Ensure that the correct config file is used.
@@ -416,7 +433,7 @@ class zabbix::agent (
     ensure  => file,
     owner   => $agent_config_owner,
     group   => $agent_config_group,
-    mode    => '0664',
+    mode    => '0644',
     notify  => Service[$servicename],
     require => Package[$zabbix_package_agent],
     replace => true,

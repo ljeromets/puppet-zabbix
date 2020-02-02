@@ -23,6 +23,8 @@ describe 'zabbix::agent' do
       config_path = case facts[:operatingsystem]
                     when 'Fedora'
                       '/etc/zabbix_agentd.conf'
+                    when 'windows'
+                      'C:/ProgramData/zabbix/zabbix_agentd.conf'
                     else
                       '/etc/zabbix/zabbix_agentd.conf'
                     end
@@ -33,6 +35,9 @@ describe 'zabbix::agent' do
       if facts[:osfamily] == 'Gentoo'
         package_name = 'zabbix'
         service_name = 'zabbix-agentd'
+      elsif facts[:osfamily] == 'windows'
+        package_name = 'zabbix-agent'
+        service_name = 'Zabbix Agent'
       else
         package_name = 'zabbix-agent'
         service_name = 'zabbix-agent'
@@ -64,6 +69,26 @@ describe 'zabbix::agent' do
         it { is_expected.to contain_zabbix__startup(service_name).that_requires("Package[#{package_name}]") }
         it { is_expected.to compile.with_all_deps }
         it { is_expected.to contain_class('zabbix::params') }
+      end
+
+      context 'when declaring manage_choco is true and zabbix_package_state is present' do
+        let :params do
+          {
+            manage_choco: true,
+            zabbix_package_state: 'present'
+          }
+        end
+
+        case facts[:osfamily]
+        when 'windows'
+          it do
+            is_expected.to contain_package(package_name).with(
+              ensure:   '4.4.5',
+              provider: 'chocolatey',
+              tag:      'zabbix'
+            )
+          end
+        end
       end
 
       context 'when declaring manage_repo is true' do

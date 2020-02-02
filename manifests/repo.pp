@@ -32,11 +32,11 @@
 # Copyright 2014 Werner Dijkerman
 #
 class zabbix::repo (
-  Boolean                                              $manage_repo    = $zabbix::params::manage_repo,
-  Boolean                                              $manage_apt     = $zabbix::params::manage_apt,
-  Boolean                                              $manage_choco   = $zabbix::params::manage_choco,
-  Variant[String[0],Stdlib::HTTPUrl, Stdlib::HTTPSUrl] $repo_location  = $zabbix::params::repo_location,
-  String[1]                                            $zabbix_version = $zabbix::params::zabbix_version,
+  Boolean                   $manage_repo               = $zabbix::params::manage_repo,
+  Boolean                   $manage_apt                = $zabbix::params::manage_apt,
+  Optional[Stdlib::HTTPUrl] $repo_location             = $zabbix::params::repo_location,
+  Optional[Stdlib::HTTPUrl] $unsupported_repo_location = $zabbix::params::unsupported_repo_location,
+  String[1]                 $zabbix_version            = $zabbix::params::zabbix_version,
 ) inherits zabbix::params {
   if ($manage_repo) {
     case $facts['os']['name'] {
@@ -158,11 +158,6 @@ class zabbix::repo (
         }
         Apt::Source['zabbix'] -> Package<|tag == 'zabbix'|>
         Class['Apt::Update']  -> Package<|tag == 'zabbix'|>
-      }
-      'windows' : {
-        if ($manage_choco) {
-          include chocolatey
-        }
       }
       default  : {
         fail("Managing a repo on ${facts['os']['family']} is currently not implemented")
