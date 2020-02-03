@@ -30,6 +30,7 @@ class zabbix::params {
       $agent_include            = '/etc/zabbix/zabbix_agentd.d'
       $server_zabbix_user       = 'zabbix'
       $zabbix_package_provider  = undef
+      $agent_loadmodulepath     = '/usr/lib/modules'
     }
     'Archlinux': {
       $server_fpinglocation     = '/usr/bin/fping'
@@ -48,6 +49,7 @@ class zabbix::params {
       $agent_include            = '/etc/zabbix/zabbix_agentd.d'
       $server_zabbix_user       = 'zabbix-server'
       $zabbix_package_provider  = undef
+      $agent_loadmodulepath     = '/usr/lib/modules'
     }
     'Fedora': {
       $server_fpinglocation     = '/usr/sbin/fping'
@@ -66,6 +68,7 @@ class zabbix::params {
       $agent_include            = '/etc/zabbix/zabbix_agentd.d'
       $server_zabbix_user       = 'zabbix'
       $zabbix_package_provider  = undef
+      $agent_loadmodulepath     = '/usr/lib/modules'
     }
     'Gentoo': {
       $server_fpinglocation     = '/usr/sbin/fping'
@@ -84,6 +87,7 @@ class zabbix::params {
       $agent_include            = '/etc/zabbix/zabbix_agentd.d'
       $server_zabbix_user       = 'zabbix'
       $zabbix_package_provider  = undef
+      $agent_loadmodulepath     = '/usr/lib/modules'
     }
     'windows': {
       $manage_repo             = false
@@ -97,6 +101,7 @@ class zabbix::params {
       $agent_pidfile           = 'C:/ProgramData/zabbix/zabbix_agentd.pid'
       $agent_servicename       = 'Zabbix Agent'
       $agent_include           = 'C:/ProgramData/zabbix/zabbix_agentd.d'
+      $agent_loadmodulepath    = undef
     }
     default  : {
       $server_fpinglocation     = '/usr/sbin/fping'
@@ -115,6 +120,7 @@ class zabbix::params {
       $agent_servicename        = 'zabbix-agent'
       $server_zabbix_user       = 'zabbix'
       $zabbix_package_provider  = undef
+      $agent_loadmodulepath     = '/usr/lib/modules'
     }
   }
 
@@ -122,6 +128,11 @@ class zabbix::params {
   $zabbix_version = downcase($facts['kernel']) ? {
     'windows' => '4.4.5',
     default   => '3.4',
+  }
+
+  $manage_startup_script = downcase($facts['kernel']) ? {
+    'windows' => false,
+    default   => true,
   }
 
   $zabbix_package_state                     = 'present'
@@ -136,7 +147,6 @@ class zabbix::params {
   $zabbix_web_ip                            = '127.0.0.1'
   $manage_database                          = true
   $manage_service                           = true
-  $manage_startup_script                    = true
   $default_vhost                            = false
   $manage_firewall                          = false
   $manage_apt                               = true
@@ -275,7 +285,6 @@ class zabbix::params {
   $agent_listenip                           = undef
   $agent_listenport                         = '10050'
   $agent_loadmodule                         = undef
-  $agent_loadmodulepath                     = '/usr/lib/modules'
   $agent_logremotecommands                  = '0'
   $agent_maxlinespersecond                  = '100'
   $agent_refreshactivechecks                = '120'
