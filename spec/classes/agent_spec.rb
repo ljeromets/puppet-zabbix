@@ -78,7 +78,7 @@ describe 'zabbix::agent' do
               require:    "Package[#{package_name}]"
             )
           end
-  
+
           it { is_expected.to contain_file(include_dir).with_ensure('directory') }
           it { is_expected.to contain_zabbix__startup(service_name).with(require: "Package[#{package_name}]") }
           it { is_expected.to compile.with_all_deps }
@@ -183,15 +183,15 @@ describe 'zabbix::agent' do
       end
 
       context 'it creates a startup script' do
-        case facts[:osfamily]
-        when 'Archlinux', 'Fedora', 'Gentoo'
-          it { is_expected.to contain_file("/etc/init.d/#{service_name}").with_ensure('absent') }
-          it { is_expected.to contain_file("/etc/systemd/system/#{service_name}.service").with_ensure('file') }
-        when 'windows'
-          it { is_expected.to have_exec_resource_count(1) }
-        else
-          it { is_expected.to contain_file("/etc/init.d/#{service_name}").with_ensure('file') }
-          it { is_expected.not_to contain_file("/etc/systemd/system/#{service_name}.service") }
+        if facts[:kernel] == 'Linux'
+          case facts[:osfamily]
+          when 'Archlinux', 'Fedora', 'Gentoo'
+            it { is_expected.to contain_file("/etc/init.d/#{service_name}").with_ensure('absent') }
+            it { is_expected.to contain_file("/etc/systemd/system/#{service_name}.service").with_ensure('file') }
+          else
+            it { is_expected.to contain_file("/etc/init.d/#{service_name}").with_ensure('file') }
+            it { is_expected.not_to contain_file("/etc/systemd/system/#{service_name}.service") }
+          end
         end
       end
 

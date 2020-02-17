@@ -29,6 +29,7 @@
 #
 # [*manage_choco*]
 #   When true on windows, it will use chocolatey to install the agent.
+#   The module chocolatey is required https://forge.puppet.com/puppetlabs/chocolatey
 #
 # [*zabbix_package_provider*]
 #   Which package's provider to use to install the agent.
@@ -283,7 +284,7 @@ class zabbix::agent (
   $include_dir_purge                              = $zabbix::params::agent_include_purge,
   $unsafeuserparameters                           = $zabbix::params::agent_unsafeuserparameters,
   $userparameter                                  = $zabbix::params::agent_userparameter,
-  Optional[String[1]] $loadmodulepath              = $zabbix::params::agent_loadmodulepath,
+  Optional[String[1]] $loadmodulepath             = $zabbix::params::agent_loadmodulepath,
   $loadmodule                                     = $zabbix::params::agent_loadmodule,
   $tlsaccept                                      = $zabbix::params::agent_tlsaccept,
   $tlscafile                                      = $zabbix::params::agent_tlscafile,
@@ -295,8 +296,8 @@ class zabbix::agent (
   $tlspskidentity                                 = $zabbix::params::agent_tlspskidentity,
   $tlsservercertissuer                            = $zabbix::params::agent_tlsservercertissuer,
   $tlsservercertsubject                           = $zabbix::params::agent_tlsservercertsubject,
-  Optional[String[1]] $agent_config_owner            = $zabbix::params::agent_config_owner,
-  Optional[String[1]] $agent_config_group            = $zabbix::params::agent_config_group,
+  Optional[String[1]] $agent_config_owner         = $zabbix::params::agent_config_owner,
+  Optional[String[1]] $agent_config_group         = $zabbix::params::agent_config_group,
   Boolean $manage_selinux                         = $zabbix::params::manage_selinux,
   Array[String] $selinux_require                  = $zabbix::params::selinux_require,
   Hash[String, Array] $selinux_rules              = $zabbix::params::selinux_rules,
