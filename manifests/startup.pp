@@ -64,7 +64,7 @@ define zabbix::startup (
       provider => powershell,
       notify   => Service[$name],
     }
-  }else {
+  } else {
     fail('We currently only support Debian, Redhat and Windows osfamily as non-systemd')
   }
 }
